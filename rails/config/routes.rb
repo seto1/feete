@@ -4,5 +4,4 @@ Rails.application.routes.draw do
   post 'posts/:id',    to: 'posts#update'
   post 'token/jwt',    to: 'token#jwt'
   post 'token/decode', to: 'token#decode'
-  post 'init',         to: 'init#index'
 end

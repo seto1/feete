@@ -13,3 +13,12 @@ TODO
 - 月別リスト
 - 認証
 - 暗号化
+
+実行
+
+```
+rake db:create
+rails db:migrate
+rails init_app[【32文字のランダムなキー】] RAILS_ENV=【環境変数】
+# 例 rails init_app[12345678901234567890123456789012] RAILS_ENV=development
+```
