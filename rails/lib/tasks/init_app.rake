@@ -3,6 +3,12 @@ task :init_app, ['key'] => :environment do |task, args|
   db_path = File.expand_path(db_path)
   unless (File.exist?(db_path))
     p 'not exist db'
+    next
+  end
+
+  if (File.exist?('db/enc'))
+    p 'exist enc'
+    next
   end
 
   begin
