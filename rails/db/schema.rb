@@ -14,8 +14,7 @@ ActiveRecord::Schema.define(version: 2021_09_16_085102) do
 
   create_table "posts", force: :cascade do |t|
     t.text "text"
-    t.text "tag"
-    t.date "date"
+    t.datetime "date"
   end
 
 end

@@ -36,10 +36,42 @@ class PostsController < ApplicationController
   end
 
   def create
-    render json: {}
+    now = Time.current
+    puts now.strftime('%Y-%m-%d %H:%M:%S')
+    post = Post.new(text: params[:text], date: now.strftime('%Y-%m-%d %H:%M:%S'))
+
+    if post.save
+      render json: { success: true }
+    else
+      render json: { error: 'failed to save', validate: post.errors.messages }
+    end
   end
 
   def update
-    render json: {}
+    begin
+      post = Post.find(params[:id])
+    rescue => e
+      return render json: { error: e }
+    end
+
+    if post.update(text: params[:text])
+      render json: { success: true }
+    else
+      render json: { error: 'failed to save', validate: post.errors.messages }
+    end
+  end
+
+  def destroy
+    begin
+      post = Post.find(params[:id])
+    rescue => e
+      return render json: { error: e }
+    end
+
+    if post.destroy
+      render json: { success: true }
+    else
+      render json: { error: 'failed to delete' }
+    end
   end
 end
