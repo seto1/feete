@@ -15,13 +15,6 @@ module EncryptFileService
     end
   end
 
-
-  # db_path = Rails.configuration.database_configuration[ENV['RAILS_ENV']]['database']
-  # EncryptFileService.decrypt(
-  #   source: File.expand_path('db/enc'),
-  #   dest: File.expand_path(db_path),
-  #   key: jwt_decode.first['key']
-  # )
   def decrypt(source:, dest:, key:)
     encoded_data = ''
     File.open(source, 'r') do |t|
@@ -30,10 +23,13 @@ module EncryptFileService
     decoded_data = Base64.decode64(encoded_data)
 
     decrypted_data = self.decrypt_data(encrypted_data: decoded_data, key: key)
+    return false unless decrypted_data
 
     File.open(dest, 'wb') do |file|
       file.puts(decrypted_data)
     end
+
+    true
   end
 
   def check_key(path:, key:)
