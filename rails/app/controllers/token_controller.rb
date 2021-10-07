@@ -16,4 +16,8 @@ class TokenController < ApplicationController
     end
   end
 
+  def test
+    render json: { test: 'success' }
+  end
+
 end
