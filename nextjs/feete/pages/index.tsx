@@ -1,22 +1,31 @@
-import Head from 'next/head'
+import { useEffect, useState } from 'react';
+import Login from '../components/login'
+import Posts from '../components/posts'
 
 export default function Index() {
-  let login = async (event: React.MouseEvent<HTMLFormElement>) => {
-    event.preventDefault();
 
-    const res = await fetch('http://localhost:3100/test');
-    console.log(res);
-    console.log(await res.json());
-  }
-  return (
-    <div>
-      <Head>
-        <title>Create Next App</title>
-      </Head>
-      <form onSubmit={login}>
-        <input name="key" />
-        <button type="submit">submit</button>
-      </form>
-    </div>
-  )
+  const [jwt, setJwt] = useState('');
+
+  useEffect(() => {
+    (async() => {
+      const localJwt: string = localStorage.getItem('jwt') as string;
+      setJwt(localJwt);
+      if (localJwt) {
+        const res = await fetch('http://localhost:3100/posts', {
+          headers: {
+            'Authorization': 'Bearer ' + localJwt,
+          },
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+        console.log(data);
+      }
+    })();
+  });
+
+  if (jwt) return <Posts />
+  else return <Login />
 }

@@ -1,13 +1,14 @@
-class PostsController < ApplicationController
-  skip_forgery_protection
-
+class PostsController < ActionController::API
   before_action :before_action
   after_action :after_action
 
   def before_action
+    key = header_key
     begin
-      jwt_decode = JWT.decode(params[:token], Rails.application.secrets.secret_key_base)
+      jwt_decode = JWT.decode(key, Rails.application.secrets.secret_key_base)
       @jwt_data = jwt_decode.first
+
+      raise 'key error' unless jwt_decode.first['key']
 
       db_path = Rails.configuration.database_configuration[ENV['RAILS_ENV']]['database']
       decrypt = EncryptFileService.decrypt(
@@ -21,6 +22,12 @@ class PostsController < ApplicationController
     end
   end
 
+  def header_key
+    authorization = request.headers[:Authorization]
+    match = authorization.match(/\ABearer\s+(.+)/)
+    match[1] if match
+  end
+
   def after_action
     db_path = Rails.configuration.database_configuration[ENV['RAILS_ENV']]['database']
     EncryptFileService.encrypt(
@@ -32,7 +39,7 @@ class PostsController < ApplicationController
   end
 
   def index
-    render json: {}
+    render json: { success: true }
   end
 
   def create
@@ -43,7 +50,7 @@ class PostsController < ApplicationController
     if post.save
       render json: { success: true }
     else
-      render json: { error: 'failed to save', validate: post.errors.messages }
+      render json: { error: 'failed to create', validate: post.errors.messages }
     end
   end
 
@@ -57,7 +64,7 @@ class PostsController < ApplicationController
     if post.update(text: params[:text])
       render json: { success: true }
     else
-      render json: { error: 'failed to save', validate: post.errors.messages }
+      render json: { error: 'failed to update', validate: post.errors.messages }
     end
   end
 

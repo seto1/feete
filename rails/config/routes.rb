@@ -4,6 +4,4 @@ Rails.application.routes.draw do
   post   'posts/:id',   to: 'posts#update'
   delete 'posts/:id',   to: 'posts#destroy'
   post   'token/jwt',   to: 'token#jwt'
-
-  get    'test',         to: 'token#test'
 end
