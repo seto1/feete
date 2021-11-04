@@ -6,5 +6,5 @@ export default function Index() {
   const { posts, setJwt } = posthook();
 
   if (posts) return <Posts />
-  else return <Login name="John" setJwt={setJwt} />
+  else return <Login setJwt={setJwt} />
 }

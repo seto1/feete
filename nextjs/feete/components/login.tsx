@@ -1,6 +1,10 @@
 import Head from 'next/head';
 
-export default function Login(props) {
+type LoginProps = {
+  setJwt: Function;
+}
+
+export default function Login(props: LoginProps) {
 
   let login = async (event: React.MouseEvent<HTMLFormElement>) => {
     event.preventDefault();
