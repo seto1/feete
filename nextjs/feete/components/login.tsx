@@ -1,6 +1,7 @@
 import Head from 'next/head';
 
-export default function Login() {
+export default function Login(props) {
+
   let login = async (event: React.MouseEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -16,6 +17,7 @@ export default function Login() {
       return;
     }
     localStorage.setItem('jwt', data.jwt);
+    props.setJwt(data.jwt);
   }
 
   return (

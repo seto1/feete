@@ -24,6 +24,7 @@ class PostsController < ActionController::API
 
   def header_key
     authorization = request.headers[:Authorization]
+    return false unless authorization
     match = authorization.match(/\ABearer\s+(.+)/)
     match[1] if match
   end
