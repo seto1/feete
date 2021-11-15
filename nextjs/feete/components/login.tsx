@@ -22,7 +22,7 @@ export default function Login(props: LoginProps) {
     }
     localStorage.setItem('jwt', data.jwt);
     props.setJwt(data.jwt);
-  }
+  };
 
   return (
     <>
