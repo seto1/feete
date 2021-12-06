@@ -3,58 +3,69 @@ class PostsController < ActionController::API
   after_action :after_action
 
   def before_action
-    # key = header_key
-    # begin
-    #   jwt_decode = JWT.decode(key, Rails.application.secrets.secret_key_base)
-    #   @jwt_data = jwt_decode.first
-    #
-    #   raise 'key error' unless jwt_decode.first['key']
-    #
-    #   db_path = Rails.configuration.database_configuration[ENV['RAILS_ENV']]['database']
-    #   decrypt = EncryptFileService.decrypt(
-    #     source: File.expand_path('db/enc'),
-    #     dest: File.expand_path(db_path),
-    #     key: jwt_decode.first['key']
-    #   )
-    #   raise 'db decrypt error' unless decrypt
-    # rescue => e
-    #   return render json: { error: e }
-    # end
+    begin
+      key = header_key
+      decrypt = EncryptFileService.decrypt(
+        source: File.expand_path('db/enc'),
+        dest: File.expand_path(Rails.configuration.app['dbPath']),
+        key: key
+      )
+      raise 'db decrypt error' unless decrypt
+    rescue => e
+      return render json: { error: e }
+    end
+    @db = SQLite3::Database.new Rails.configuration.app['dbPath']
+    @db.results_as_hash = true
   end
 
   def header_key
     authorization = request.headers[:Authorization]
     return false unless authorization
     match = authorization.match(/\ABearer\s+(.+)/)
-    match[1] if match
+    return unless match
+
+    secret = Rails.application.secrets.secret_key_base
+    secret = Digest::SHA256.hexdigest(secret)
+    secret = secret.slice(0, 32)
+    encryptor = ActiveSupport::MessageEncryptor.new(secret, cipher: 'aes-256-cbc')
+    encryptor.decrypt_and_verify(match[1])
   end
 
   def after_action
-    # db_path = Rails.configuration.database_configuration[ENV['RAILS_ENV']]['database']
-    # EncryptFileService.encrypt(
-    #   key: @jwt_data['key'],
-    #   source: File.expand_path(db_path),
-    #   dest: File.expand_path('db/enc')
-    # )
-    # EncryptFileService.delete(File.expand_path(db_path))
+    key = header_key
+    EncryptFileService.encrypt(
+      key: key,
+      source: File.expand_path(Rails.configuration.app['dbPath']),
+      dest: File.expand_path('db/enc')
+    )
+    EncryptFileService.delete(File.expand_path(Rails.configuration.app['dbPath']))
   end
 
   def index
-    posts = Post.all.order(id: 'DESC')
+    sql = <<-SQL
+      SELECT * FROM POSTS ORDER BY id DESC;
+    SQL
+    posts = []
+    @db.execute(sql) do |row|
+      posts.push(row)
+    end
     render json: { success: true, posts: posts }
   end
 
   def create
     json_request = JSON.parse(request.body.read)
 
-    now = Time.current
-    puts now.strftime('%Y-%m-%d %H:%M:%S')
-    post = Post.new(text: json_request['text'], date: now.strftime('%Y-%m-%d %H:%M:%S'))
+    # todo validate
 
-    if post.save
+    begin
+      now = Time.current
+      sql = <<-SQL
+        INSERT INTO posts (text, date) VALUES (?, ?);
+      SQL
+      @db.prepare(sql).execute(json_request['text'], now.strftime('%Y-%m-%d %H:%M:%S'))
       render json: { success: true }
-    else
-      render json: { error: 'failed to create', validate: post.errors.messages }
+    rescue => e
+      render json: { error: 'failed to create' }
     end
   end
 

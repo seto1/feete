@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import { fetchPosts }  from '../libs/post';
 
 type LoginProps = {
-  jwt: string;
+  apiKey: string;
 }
 
 export default function Posts(props: LoginProps) {
-  const [jwt, setJwt] = useState('');
   const [posts, setPost] = useState([]);
 
   let post = async(event: React.MouseEvent<HTMLFormElement>) => {
@@ -14,7 +13,7 @@ export default function Posts(props: LoginProps) {
     const res = await fetch('http://localhost:3100/posts', {
       method: 'POST',
       headers: new Headers({
-        'Authorization': 'Bearer ' + props.jwt,
+        'Authorization': 'Bearer ' + props.apiKey,
       }),
       body: JSON.stringify({
         text: event.currentTarget.key.value,
@@ -25,11 +24,11 @@ export default function Posts(props: LoginProps) {
       alert(data.error);
       return;
     }
-    fetchPosts(jwt, setPost)
+    fetchPosts(props.apiKey, setPost)
   };
 
   useEffect(() => {
-    fetchPosts(jwt, setPost)
+    fetchPosts(props.apiKey, setPost)
   }, []);
 
   return (
@@ -41,7 +40,7 @@ export default function Posts(props: LoginProps) {
       <div>
         {posts.length > 0 &&
           <>
-            {posts.map((post) => {
+            {posts.map((post: any) => {
               return (
                 <div key={post.id}>
                   {post.text}

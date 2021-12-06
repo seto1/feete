@@ -2,18 +2,18 @@ import { useEffect, useState } from 'react';
 import { fetchPosts }  from '../libs/post';
 
 export default function posthook() {
-  const [jwt, setJwt] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const [posts, setPost] = useState('');
 
   useEffect(() => {
-      const localJwt: string = localStorage.getItem('jwt') as string;
-      setJwt(localJwt);
+    const localKey: string = localStorage.getItem('key') as string;
+    setApiKey(localKey);
   }, []);
 
   useEffect(() => {
-    if (! jwt) return;
-    fetchPosts(jwt, setPost)
-  }, [jwt]);
+    if (! apiKey) return;
+    fetchPosts(apiKey, setPost)
+  }, [apiKey]);
 
-  return { posts, setJwt, jwt }
+  return { posts, setApiKey, apiKey }
 }

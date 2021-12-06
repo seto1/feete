@@ -34,5 +34,7 @@ module App
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.app = config_for(:app)
   end
 end

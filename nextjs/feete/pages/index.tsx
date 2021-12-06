@@ -3,8 +3,8 @@ import Posts from '../components/posts'
 import posthook from '../hooks/posthook'
 
 export default function Index() {
-  const { posts, setJwt, jwt } = posthook();
+  const { posts, setApiKey, apiKey } = posthook();
 
-  if (posts) return <Posts jwt={jwt} />
-  else return <Login setJwt={setJwt} />
+  if (posts) return <Posts apiKey={apiKey} />
+  else return <Login setApiKey={setApiKey} />
 }

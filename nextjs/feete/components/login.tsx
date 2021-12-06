@@ -1,7 +1,7 @@
 import Head from 'next/head';
 
 type LoginProps = {
-  setJwt: Function;
+  setApiKey: Function;
 }
 
 export default function Login(props: LoginProps) {
@@ -9,7 +9,7 @@ export default function Login(props: LoginProps) {
   let login = async (event: React.MouseEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const res = await fetch('http://localhost:3100/token/jwt', {
+    const res = await fetch('http://localhost:3100/token', {
       method: 'POST',
       body: JSON.stringify({
         key: event.currentTarget.key.value,
@@ -20,8 +20,8 @@ export default function Login(props: LoginProps) {
       alert(data.error);
       return;
     }
-    localStorage.setItem('jwt', data.jwt);
-    props.setJwt(data.jwt);
+    localStorage.setItem('key', data.token);
+    props.setApiKey(data.token);
   };
 
   return (

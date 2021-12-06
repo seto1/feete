@@ -1,0 +1,2 @@
+development:
+  dbPath: 'db/d.sqlite3'

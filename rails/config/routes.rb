@@ -3,5 +3,7 @@ Rails.application.routes.draw do
   post   'posts',       to: 'posts#create'
   post   'posts/:id',   to: 'posts#update'
   delete 'posts/:id',   to: 'posts#destroy'
-  post   'token/jwt',   to: 'token#jwt'
+  post   'token',       to: 'token#create'
+
+  get    'test',        to: 'test#index'
 end
