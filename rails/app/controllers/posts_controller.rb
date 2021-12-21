@@ -86,18 +86,29 @@ class PostsController < ActionController::API
   end
 
   def destroy
-    json_request = JSON.parse(request.body.read)
-
     begin
-      post = Post.find(json_request['id'])
+      sql = <<-SQL
+        SELECT * FROM posts WHERE id = ?
+      SQL
+      posts = @db.prepare(sql).execute(params[:id])
+      post = posts.first
+      raise 'post doesnt exist' unless post
+
+      sql = <<-SQL
+        DELETE FROM posts WHERE id = ?
+      SQL
+      @db.prepare(sql).execute(params[:id])
+
+      sql = <<-SQL
+        SELECT * FROM posts WHERE id = ?
+      SQL
+      posts = @db.prepare(sql).execute(params[:id])
+      post = posts.first
+      raise 'failed to delete' if post && post.size
+
+      render json: { success: true }
     rescue => e
       return render json: { error: e }
-    end
-
-    if post.destroy
-      render json: { success: true }
-    else
-      render json: { error: 'failed to delete' }
     end
   end
 end

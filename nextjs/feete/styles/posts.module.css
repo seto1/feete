@@ -1,0 +1,10 @@
+.postsPage {
+  padding: 20px 50px;
+}
+.post {
+  border-bottom: 1px solid #ccc;
+  padding: 20px 0;
+}
+.postDelete {
+  font-size: 12px;
+}
