@@ -24,8 +24,10 @@ cd rails
 docker-compose up
 docker exec -it [コンテナID] bash
 
-rake db:create
-rails db:migrate
+# コメントアウト
+# rake db:create
+# rails db:migrate
+# TODO: DB作成
 # コメントアウト
 # rails init_app[【32文字のランダムなキー】] RAILS_ENV=【環境変数】
 # 例 rails init_app[12345678901234567890123456789012] RAILS_ENV=development
