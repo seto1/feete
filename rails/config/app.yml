@@ -1,2 +1,3 @@
 development:
   dbPath: 'db/d.sqlite3'
+  dbEncPath: 'db/enc'

@@ -6,7 +6,7 @@ class PostsController < ActionController::API
     begin
       key = header_key
       decrypt = EncryptFileService.decrypt(
-        source: File.expand_path('db/enc'),
+        source: File.expand_path(Rails.configuration.app['dbEncPath']),
         dest: File.expand_path(Rails.configuration.app['dbPath']),
         key: key
       )
@@ -14,8 +14,10 @@ class PostsController < ActionController::API
     rescue => e
       return render json: { error: e }
     end
-    @db = SQLite3::Database.new Rails.configuration.app['dbPath']
-    @db.results_as_hash = true
+    ActiveRecord::Base.establish_connection(
+      adapter:   'sqlite3',
+      database:  Rails.configuration.app['dbPath']
+    )
   end
 
   def header_key
@@ -36,19 +38,13 @@ class PostsController < ActionController::API
     EncryptFileService.encrypt(
       key: key,
       source: File.expand_path(Rails.configuration.app['dbPath']),
-      dest: File.expand_path('db/enc')
+      dest: File.expand_path(Rails.configuration.app['dbEncPath'])
     )
     EncryptFileService.delete(File.expand_path(Rails.configuration.app['dbPath']))
   end
 
   def index
-    sql = <<-SQL
-      SELECT * FROM POSTS ORDER BY id DESC;
-    SQL
-    posts = []
-    @db.execute(sql) do |row|
-      posts.push(row)
-    end
+    posts = Post.all.order(id: 'DESC')
     render json: { success: true, posts: posts }
   end
 
@@ -57,14 +53,12 @@ class PostsController < ActionController::API
 
     # todo validate
 
-    begin
-      now = Time.current
-      sql = <<-SQL
-        INSERT INTO posts (text, date) VALUES (?, ?);
-      SQL
-      @db.prepare(sql).execute(json_request['text'], now.strftime('%Y-%m-%d %H:%M:%S'))
+    now = Time.current
+    post = Post.new(text: json_request['text'], date:now.strftime('%Y-%m-%d %H:%M:%S'))
+
+    if post.save
       render json: { success: true }
-    rescue => e
+    else
       render json: { error: 'failed to create' }
     end
   end
@@ -87,28 +81,15 @@ class PostsController < ActionController::API
 
   def destroy
     begin
-      sql = <<-SQL
-        SELECT * FROM posts WHERE id = ?
-      SQL
-      posts = @db.prepare(sql).execute(params[:id])
-      post = posts.first
-      raise 'post doesnt exist' unless post
-
-      sql = <<-SQL
-        DELETE FROM posts WHERE id = ?
-      SQL
-      @db.prepare(sql).execute(params[:id])
-
-      sql = <<-SQL
-        SELECT * FROM posts WHERE id = ?
-      SQL
-      posts = @db.prepare(sql).execute(params[:id])
-      post = posts.first
-      raise 'failed to delete' if post && post.size
-
-      render json: { success: true }
+      post = Post.find(params[:id])
     rescue => e
       return render json: { error: e }
+    end
+
+    if post.destroy
+      render json: { success: true }
+    else
+      return render json: { error: 'failed to delete' }
     end
   end
 end
